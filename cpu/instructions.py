@@ -1,3 +1,6 @@
+"""
+Gameboy Emulator Written in Python
+
 MIT License
 
 Copyright (c) 2017 Ryan Sheffer
@@ -19,3 +22,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+"""
+
+
+class Instruction:
+    """
+    An Instruction of the CPU
+    """
+    def __init__(self, disassembly, num_operands, execute):
+        self.disassembly = disassembly
+        self.num_operands = num_operands
+        self.execute = execute
+
+
+# List of all instructions in op-code order
+instructions = [
+    Instruction("NOP",                  0, None),   # 0x00
+    Instruction("LD BC, 0x%04X",        0, None),   # 0x01
+]

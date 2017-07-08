@@ -1,3 +1,6 @@
+"""
+Gameboy Emulator Written in Python
+
 MIT License
 
 Copyright (c) 2017 Ryan Sheffer
@@ -19,3 +22,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+"""
+
+
+class Registers:
+    def __init__(self):
+
+        # General Purpose Registers
+        self.a = 0
+        self.b = 0
+        self.c = 0
+        self.d = 0
+        self.e = 0
+        self.h = 0
+        self.l = 0
+
+        # Flags
+        self.f = 0
+
+        #
+        self.sp = 0
+
+        # Program Counter
+        self.pc = 0

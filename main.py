@@ -1,3 +1,6 @@
+"""
+Gameboy Emulator Written in Python
+
 MIT License
 
 Copyright (c) 2017 Ryan Sheffer
@@ -19,3 +22,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+"""
+
+from cpu import cpu
+from memory import memory
+
+
+def main():
+    """
+    Execute the software, begin Rom selection, begin CPU
+    """
+    print("hello Z80!")
+
+if __name__ == '__main__':
+    main()
