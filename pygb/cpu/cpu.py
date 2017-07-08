@@ -24,14 +24,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import pygb.memory.memory
+
+from pygb.cpu import registers
 
 
-def main():
-    """
-    Execute the software, begin Rom selection, begin CPU
-    """
-    print("hello Z80!")
+class Capabilities:
+    cpu_clock_mhz = 4.194304
 
-if __name__ == '__main__':
-    main()
+
+class CPU:
+    def __init__(self):
+        self.registers = registers.Registers()
+
+    def step(self):
+        pass

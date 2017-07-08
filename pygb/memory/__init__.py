@@ -23,18 +23,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
-
-from cpu import registers, instructions
-
-
-class Capabilities:
-    cpu_clock_mhz = 4.194304
-
-
-class CPU:
-    def __init__(self):
-        self.registers = registers.Registers()
-
-    def step(self):
-        pass

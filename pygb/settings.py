@@ -24,14 +24,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import pygb.memory.memory
-
-
-def main():
-    """
-    Execute the software, begin Rom selection, begin CPU
-    """
-    print("hello Z80!")
-
-if __name__ == '__main__':
-    main()
+DEBUG = False

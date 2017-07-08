@@ -24,6 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import pygb.settings
+
 
 class Capabilities:
     """
@@ -90,7 +92,8 @@ class MemoryLocations:
         print("Interrupt Enable Register  : {:02X}".format(MemoryLocations.interrupt_enable_addr))
 
 # Debug
-MemoryLocations.print_mem_locations()
+if pygb.settings.DEBUG:
+    MemoryLocations.print_mem_locations()
 
 
 class MemoryException(Exception):
@@ -137,23 +140,26 @@ class MemoryPool:
         :param address: The address to read.
         :return:
         """
-        self.check_address(address)
+        if pygb.settings.DEBUG:
+            self.check_address(address)
         return self.mem[address]
 
     def read_short(self, address):
-        self.check_address(address)
-        self.check_address(address + 1)
+        if pygb.settings.DEBUG:
+            self.check_address(address)
+            self.check_address(address + 1)
         return int.from_bytes(self.mv[address:address + 2].tobytes(), byteorder='big')
 
     def write_byte(self, address, byte):
-        self.check_address(address)
+        if pygb.settings.DEBUG:
+            self.check_address(address)
         self.mem[address] = byte
         self.handle_echo_space(address, byte.to_bytes(1, byteorder='big'))
 
     def write_short(self, address, short):
-        self.check_address(address)
-        self.check_address(address + 1)
-
+        if pygb.settings.DEBUG:
+            self.check_address(address)
+            self.check_address(address + 1)
         bytes_in = short.to_bytes(2, byteorder='big')
         self.mv[address:address + 2] = bytes_in
         self.handle_echo_space(address, bytes_in)
@@ -262,4 +268,5 @@ class MemoryPoolTest:
         memory_pool.reset()
 
 # Test memory space module
-MemoryPoolTest.run_test()
+if pygb.settings.DEBUG:
+    MemoryPoolTest.run_test()
