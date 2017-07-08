@@ -25,13 +25,14 @@ SOFTWARE.
 """
 
 import pygb.memory.memory
+import pygb.cpu.registers
 
 
 def main():
     """
     Execute the software, begin Rom selection, begin CPU
     """
-    print("hello Z80!")
+    print("Hello Z80!")
 
 if __name__ == '__main__':
     main()
