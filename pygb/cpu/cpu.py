@@ -1,5 +1,5 @@
 """
-Gameboy Emulator Written in Python
+GameBoy Emulator Written in Python
 
 MIT License
 
@@ -26,6 +26,8 @@ SOFTWARE.
 
 
 from pygb.cpu import registers
+from pygb.memory.memory import MemoryPool
+from pygb.cpu.instructions.instructions import instructions
 
 
 class Capabilities:
@@ -33,8 +35,44 @@ class Capabilities:
 
 
 class CPU:
-    def __init__(self):
-        self.registers = registers.Registers()
+    def __init__(self, memory_space):
+        self.registers = registers.RegisterBank()
+        self.memory = memory_space  # type: MemoryPool
+
+    def reset(self):
+        # Setup the registers
+        self.registers.set_a(0x01)
+        self.registers.set_f(0xB0)
+        self.registers.set_b(0x00)
+        self.registers.set_c(0x13)
+        self.registers.set_d(0x00)
+        self.registers.set_e(0xD8)
+        self.registers.set_h(0x01)
+        self.registers.set_l(0x4D)
+        self.registers.set_sp(0xFFFE)
+
+        # On power up, the GameBoy Program Counter is initialized to 0x100
+        self.registers.set_pc(0x0100)
 
     def step(self):
-        pass
+        op_code = self.memory.read_byte(self.registers.inc_pc())
+        if len(instructions) <= op_code:
+            raise Exception('Instruction op-code was beyond our op-code range!')
+
+        instruction = instructions[op_code]
+        print("%02X - " % op_code, end='')
+        instruction.execute(instruction, self.registers, self.memory, True)
+
+        # Call Steps:
+        # operand = 0
+        # if instruction.num_operands == 1:
+        #     operand = self.memory.read_byte(self.registers.get_pc())
+        #     self.registers.inc_pc()
+        #     execute(operand)
+        # elif instruction.num_operands == 2:
+        #     operand = self.memory.read_short(self.registers.get_pc())
+        #     self.registers.inc_pc(2)
+        #     execute(operand)
+        # else:
+        #     # 2 max, so any other call is one parm
+        #     pass

@@ -25,21 +25,10 @@ SOFTWARE.
 """
 
 
-class Capabilities:
-    """
-    The capabilities of the GameBoy video hardware
-    """
-    mem_size = 0x2000
-
-    screen_width = 160
-    screen_height = 144
-
-    # Refresh rates
-    horiz_sync_khz = 9198
-    vert_sync_hz = 59.73
-
-    # Sprites
-    max_sprite_width = 8
-    max_sprite_height = 16
-    min_sprite_width = 8
-    min_sprite_height = 8
+def jp_nn(inst, reg, mem, debug):
+    """ Jump to address nn """
+    operand = mem.read_short(reg.get_pc())
+    reg.inc_pc(2)
+    reg.set_pc(operand)
+    if debug:
+        print(inst.disassembly % operand)

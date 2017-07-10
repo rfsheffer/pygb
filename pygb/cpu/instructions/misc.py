@@ -1,5 +1,5 @@
 """
-Gameboy Emulator Written in Python
+GameBoy Emulator Written in Python
 
 MIT License
 
@@ -25,18 +25,7 @@ SOFTWARE.
 """
 
 
-class Instruction:
-    """
-    An Instruction of the CPU
-    """
-    def __init__(self, disassembly, num_operands, execute):
-        self.disassembly = disassembly
-        self.num_operands = num_operands
-        self.execute = execute
-
-
-# List of all instructions in op-code order
-instructions = [
-    Instruction("NOP",                  0, None),   # 0x00
-    Instruction("LD BC, 0x%04X",        0, None),   # 0x01
-]
+def nop(inst, reg, mem, debug):
+    """ NO OPERATION """
+    if debug:
+        print(inst.disassembly)

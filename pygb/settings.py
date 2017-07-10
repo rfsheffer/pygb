@@ -1,5 +1,5 @@
 """
-Gameboy Emulator Written in Python
+GameBoy Emulator Written in Python
 
 MIT License
 

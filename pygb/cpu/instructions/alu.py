@@ -25,21 +25,57 @@ SOFTWARE.
 """
 
 
-class Capabilities:
-    """
-    The capabilities of the GameBoy video hardware
-    """
-    mem_size = 0x2000
+def inc_a(inst, reg, mem, debug):
+    """ Increment register A """
+    reg.inc_a()
+    if debug:
+        print(inst.disassembly)
 
-    screen_width = 160
-    screen_height = 144
 
-    # Refresh rates
-    horiz_sync_khz = 9198
-    vert_sync_hz = 59.73
+def inc_b(inst, reg, mem, debug):
+    """ Increment register B """
+    reg.inc_b()
+    if debug:
+        print(inst.disassembly)
 
-    # Sprites
-    max_sprite_width = 8
-    max_sprite_height = 16
-    min_sprite_width = 8
-    min_sprite_height = 8
+
+def inc_c(inst, reg, mem, debug):
+    """ Increment register C """
+    reg.inc_c()
+    if debug:
+        print(inst.disassembly)
+
+
+def inc_d(inst, reg, mem, debug):
+    """ Increment register D """
+    reg.inc_d()
+    if debug:
+        print(inst.disassembly)
+
+
+def inc_e(inst, reg, mem, debug):
+    """ Increment register E """
+    reg.inc_e()
+    if debug:
+        print(inst.disassembly)
+
+
+def inc_h(inst, reg, mem, debug):
+    """ Increment register H """
+    reg.inc_h()
+    if debug:
+        print(inst.disassembly)
+
+
+def inc_l(inst, reg, mem, debug):
+    """ Increment register L """
+    reg.inc_l()
+    if debug:
+        print(inst.disassembly)
+
+
+def inc_hlp(inst, reg, mem, debug):
+    """ Increment register (HL) """
+    mem.write_byte(reg.get_hl(), reg.do_inc(mem.read_byte(reg.get_hl())))
+    if debug:
+        print(inst.disassembly)

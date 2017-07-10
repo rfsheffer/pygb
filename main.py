@@ -1,5 +1,5 @@
 """
-Gameboy Emulator Written in Python
+GameBoy Emulator Written in Python
 
 MIT License
 
@@ -24,15 +24,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import pygb.memory.memory
-import pygb.cpu.registers
+import os
+import argparse
+
+from pygb.cpu.cpu import CPU
+from pygb.memory.memory import MemoryPool
+from pygb.utility import RomInfo
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--rom', dest='rom', action='store', default='',
+                    help='The rom to load')
+args = parser.parse_args()
 
 
 def main():
     """
     Execute the software, begin Rom selection, begin CPU
     """
-    print("Hello Z80!")
+    if len(args.rom) > 0 and os.path.isfile(args.rom):
+        f = open(args.rom, 'rb')
+        rom_bytes = f.read()
+        f.close()
+
+        # Parse the rom header and get all necessary information so we can setup our environment
+        rom_info = RomInfo()
+        rom_info.get_rom_info(rom_bytes)
+        rom_info.print()
+
+        # Create a memory space based on the requirements of the rom
+        mode_string = RomInfo.cartridge_type_caps[rom_info.cart_type]
+        mem_space = MemoryPool()
+        mem_space.set_memory_mode(mode_string)
+
+        # Load in the Rom
+        mem_space.load_rom(rom_bytes)
+
+        # Read in the initial program
+        print("Running Program...")
+        cpu = CPU(mem_space)
+        cpu.reset()
+        for i in range(0, 0x0F):
+            cpu.step()
+
 
 if __name__ == '__main__':
     main()
