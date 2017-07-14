@@ -52,18 +52,16 @@ def main():
         rom_info.print()
 
         # Create a memory space based on the requirements of the rom
-        mode_string = RomInfo.cartridge_type_caps[rom_info.cart_type]
         mem_space = MemoryPool()
-        mem_space.set_memory_mode(mode_string)
 
         # Load in the Rom
-        mem_space.load_rom(rom_bytes)
+        mem_space.load_rom(rom_bytes, rom_info.cart_type)
 
         # Read in the initial program
         print("Running Program...")
         cpu = CPU(mem_space)
         cpu.reset()
-        for i in range(0, 0x0F):
+        while True:
             cpu.step()
 
 

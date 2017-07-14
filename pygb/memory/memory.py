@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from copy import deepcopy
 import pygb.settings
 from pygb.utility import get_size_to_pretty
 
@@ -33,6 +34,45 @@ class Capabilities:
     The capabilities of the GameBoy main memory
     """
     pass
+
+# Rom Memory bank types for extended rom.
+# Some roms go beyond the fixed rom 32kb fixed rom space of the device.
+# When this happens, a number of 16kb banks are open for use. On request
+# one of these banks is mapped to the switch_rom_bank area of device memory address space.
+# Capabilities are split with the + symbol
+rom_memory_bank_types = {
+    0x00: "ROM ONLY",
+    0x01: "ROM+MBC1",
+    0x02: "ROM+MBC1+RAM",
+    0x03: "ROM+MBC1+RAM+BATT",
+    0x05: "ROM+MBC2",
+    0x06: "ROM+MBC2+BATTERY",
+    0x08: "ROM+RAM",
+    0x09: "ROM+RAM+BATTERY",
+    0x0B: "ROM+MMM01",
+    0x0C: "ROM+MMM01+SRAM",
+    0x0D: "ROM+MMM01+SRAM+BATT",
+    0x0F: "ROM+MBC3+TIMER+BATT",
+    0x10: "ROM+MBC3+TIMER+RAM+BATT",
+    0x11: "ROM+MBC3",
+    0x12: "ROM+MBC3+RAM",
+    0x13: "ROM+MBC3+RAM+BATT",
+    0x19: "ROM+MBC5",
+    0x1A: "ROM+MBC5+RAM",
+    0x1B: "ROM+MBC5+RAM+BATT",
+    0x1C: "ROM+MBC5+RUMBLE",
+    0x1D: "ROM+MBC5+RUMBLE+SRAM",
+    0x1E: "ROM+MBC5+RUMBLE+SRAM+BATT",
+
+    # Special bank select types. Bandai and Hudson are software companies.
+    # I can speculate that these two companies got early dev kits and asked
+    # nintendo if their configurations could be included.
+    # Pocket camera is just that creepy camera hardware with the scary error pictures.
+    0x1F: "Pocket Camera",
+    0xFD: "Bandai+TAMA5",
+    0xFE: "Hudson+HuC-3",
+    0xFF: "Hudson+HuC-1"
+}
 
 
 class MemorySizes:
@@ -132,31 +172,52 @@ class MemoryPool:
     MAX_POOL_SIZE = 0xFFFF
 
     def __init__(self):
+        # Rom Bytes
+        self.rom = None
+
+        # Rom Bytes view
+        self.rv = None
+
+        # Memory Space Bytes
         self.mem = None
+
+        # Memory Space View
         self.mv = None
+
         self.reset()
 
-    def set_memory_mode(self, mode_string):
+        # This will be changed if the rom is using extra, bankable memory
+        self.memory_mode = 0x00  # Rom Only by default
+
+    def load_rom(self, rom_bytes, mode_index):
         """
-        Sets the requested memory mode for this cartridge
-        :param mode_string: '+' separated string with different required capabilities
+        Load a rom into memory. This much happen before the CPU can step.
+        :param rom_bytes: The bytes of the rom
+        :param mode_index: The memory bank mode type index
         """
         self.reset()
-        if mode_string != "ROM ONLY":
-            raise Exception('Unable to load rom with specially memory mapping modes yet!')
+
+        mode_string = rom_memory_bank_types[mode_index]
+        print('Loading ROM size : {}, {}'.format(get_size_to_pretty(len(rom_bytes)), len(rom_bytes)))
+        print('Rom uses bank access : {}'.format(mode_string))
 
         modes = mode_string.split('+')
         for mode in modes:
             if mode == 'ROM':
+                # Just means we are using the ROM memory space. We can assume all software will.
                 pass
             elif mode == 'MBC1':
                 # 16MBit(2MByte) ROM / 8KByte RAM or 4MBit (500KByte) ROM / 32KByte RAM
                 # Defaults to 16
                 print('Setting up MBC1')
 
-    def load_rom(self, rom_bytes):
-        print('Loading ROM size : {}'.format(get_size_to_pretty(len(rom_bytes))))
-        self.mv[0:MemoryLocations.video_ram_addr] = rom_bytes
+        # Immediately load in all rom bytes. Different memory modes address it differently.
+        self.rom = bytearray(deepcopy(rom_bytes))
+        self.rv = memoryview(self.rom)
+
+        # Load bank zero into the rom bank address space, and also bank 1 into the switch space
+        # In the case of a 32kb rom, switch space will stay put, so defaulting bank 1 into this space seems ideal
+        self.mv[0:MemoryLocations.video_ram_addr] = self.rv[0:MemoryLocations.video_ram_addr]
 
     def reset(self):
         """
@@ -166,8 +227,6 @@ class MemoryPool:
             self.mv.release()
         self.mem = bytearray(MemoryPool.MAX_POOL_SIZE)
         self.mv = memoryview(self.mem)
-
-        # self.mv
 
     @staticmethod
     def check_address(address):
@@ -188,11 +247,11 @@ class MemoryPool:
             self.check_address(address)
         return self.mem[address]
 
-    def read_short(self, address):
+    def read_short(self, address, order='little'):
         if pygb.settings.DEBUG:
             self.check_address(address)
             self.check_address(address + 1)
-        return int.from_bytes(self.mv[address:address + 2].tobytes(), byteorder='big')
+        return int.from_bytes(self.mv[address:address + 2].tobytes(), byteorder=order)
 
     def write_byte(self, address, byte):
         if pygb.settings.DEBUG:
@@ -285,26 +344,26 @@ class MemoryPoolTest:
         # SHORT CHECK
         # Write to the start of the internal mem, except it to end up in the echo space
         memory_pool.write_short(MemoryLocations.internal_ram_addr, 0xDEAD)
-        if memory_pool.read_short(MemoryLocations.echo_internal_addr) != 0xDEAD:
+        if memory_pool.read_short(MemoryLocations.echo_internal_addr, 'big') != 0xDEAD:
             raise MemoryPoolTest.MemoryPoolTestException('Write Short: Internal mem start did not get written to '
                                                          'correctly!')
 
         # Write to the farthest address into the internal ram, expect the end of echo to contain the value
         memory_pool.write_short(max_im_addr - 2, 0xDEAD)
-        if memory_pool.read_short(MemoryLocations.sprite_attrib_mem_addr - 2) != 0xDEAD:
+        if memory_pool.read_short(MemoryLocations.sprite_attrib_mem_addr - 2, 'big') != 0xDEAD:
             raise MemoryPoolTest.MemoryPoolTestException('Echo mem space end did not get written to correctly!')
 
         memory_pool.reset()
 
         # Write to the start of the echo space, expect it on internal
         memory_pool.write_short(MemoryLocations.echo_internal_addr, 0xDEAD)
-        if memory_pool.read_short(MemoryLocations.internal_ram_addr) != 0xDEAD:
+        if memory_pool.read_short(MemoryLocations.internal_ram_addr, 'big') != 0xDEAD:
             raise MemoryPoolTest.MemoryPoolTestException('Write Short: Internal mem space start did not get written to'
                                                          ' correctly!')
 
         # Write to the end of the echo space, expect it on internal
         memory_pool.write_short(MemoryLocations.sprite_attrib_mem_addr - 2, 0xDEAD)
-        if memory_pool.read_short(max_im_addr - 2) != 0xDEAD:
+        if memory_pool.read_short(max_im_addr - 2, 'big') != 0xDEAD:
             raise MemoryPoolTest.MemoryPoolTestException('Write Short: Internal mem space end did not get written to '
                                                          'correctly!')
 

@@ -23,6 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from pygb.cpu.registers import IReg
 
 # ------------------------------------------------------------------
 # LOAD into C
@@ -109,15 +110,80 @@ def ld_l_h(inst, reg, mem, debug):
     if debug:
         print(inst.disassembly)
 
+'''
+------------------------------------------------------------------
+LOAD CALLS 8bit
+'''
 
-# ------------------------------------------------------------------
-# LOAD into DE
+
+def ld_r1_r2(inst, reg, mem, debug):
+    """ Put value r2 into r1. """
+    if inst.reg_r1[1]:
+        # r2 to (r1)
+        val = reg.get_reg(inst.reg_r2[0])
+        if inst.reg_r2[1]:
+            # (r2) to (r1)
+            val = mem.read_byte(val)
+        mem.write_byte(reg.get_reg(inst.reg_r1[0]), val)
+    elif inst.reg_r2[1]:
+        # (r2) to r1
+        val = mem.read_byte(reg.get_reg(inst.reg_r2[0]))
+        reg.set_reg(inst.reg_r1[0], val)
+    else:
+        # General r2 to r1
+        reg.set_reg(inst.reg_r1[0], reg.get_reg(inst.reg_r2[0]))
 
 
-def ld_de_nn(inst, reg, mem, debug):
-    """ Load NN into DE """
-    operand = mem.read_short(reg.get_pc())
-    reg.inc_pc(2)
-    reg.set_de(operand)
+def ld_nn_n(inst, reg, mem, debug):
+    """ Put value NN into N """
+    value = mem.read_byte(reg.get_pc())
+    reg.inc_pc(1)
+
+    if inst.reg_r1[0] == IReg.REGISTER_B:
+        reg.set_b(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_C:
+        reg.set_c(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_D:
+        reg.set_d(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_E:
+        reg.set_e(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_H:
+        reg.set_h(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_L:
+        reg.set_l(value)
+
     if debug:
-        print(inst.disassembly % operand)
+        print(inst.disassembly % value)
+
+
+def ldd_hlp_a(inst, reg, mem, debug):
+    """ load A into (HL) then decrement HL """
+    mem.write_byte(reg.get_hl(), reg.get_a())
+    reg.dec_hl()
+
+    if debug:
+        print(inst.disassembly)
+
+
+'''
+------------------------------------------------------------------
+LOAD CALLS 16bit
+'''
+
+
+def ld_n_nn(inst, reg, mem, debug):
+    """ Put value NN into N """
+    value = mem.read_short(reg.get_pc())
+    reg.inc_pc(2)
+
+    if inst.reg_r1[0] == IReg.REGISTER_BC:
+        reg.set_bc(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_DE:
+        reg.set_de(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_HL:
+        reg.set_hl(value)
+    elif inst.reg_r1[0] == IReg.REGISTER_SP:
+        reg.set_sp(value)
+
+    if debug:
+        print(inst.disassembly % value)

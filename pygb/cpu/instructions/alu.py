@@ -23,6 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from pygb.cpu.registers import IReg
 
 
 def inc_a(inst, reg, mem, debug):
@@ -79,3 +80,48 @@ def inc_hlp(inst, reg, mem, debug):
     mem.write_byte(reg.get_hl(), reg.do_inc(mem.read_byte(reg.get_hl())))
     if debug:
         print(inst.disassembly)
+
+
+'''
+------------------------------------------------------------------
+BITWISE OPERATORS
+'''
+
+
+def xor_n(inst, reg, mem, debug):
+    debug_val = 0
+
+    def xor_a(value):
+        reg.set_a(reg.get_a() ^ value)
+        # Reset all flags
+        reg.set_f(0)
+        # Set zero flag
+        if reg.get_a() == 0:
+            reg.set_zero_flag(True)
+
+    if inst.reg_r1[0] == IReg.REGISTER_A:
+        xor_a(reg.get_a())
+    elif inst.reg_r1[0] == IReg.REGISTER_B:
+        xor_a(reg.get_b())
+    elif inst.reg_r1[0] == IReg.REGISTER_C:
+        xor_a(reg.get_c())
+    elif inst.reg_r1[0] == IReg.REGISTER_D:
+        xor_a(reg.get_d())
+    elif inst.reg_r1[0] == IReg.REGISTER_E:
+        xor_a(reg.get_e())
+    elif inst.reg_r1[0] == IReg.REGISTER_H:
+        xor_a(reg.get_h())
+    elif inst.reg_r1[0] == IReg.REGISTER_L:
+        xor_a(reg.get_l())
+    elif inst.reg_r1[0] == IReg.REGISTER_HL:
+        xor_a(mem.read_byte(reg.get_hl()))
+    elif inst.reg_r1[0] == IReg.REGISTER_PC:
+        debug_val = mem.read_byte(reg.get_pc())
+        reg.inc_pc(1)
+        xor_a(debug_val)
+
+    if debug:
+        if inst.reg_r1[0] == IReg.REGISTER_PC:
+            print(inst.disassembly % debug_val)
+        else:
+            print(inst.disassembly)

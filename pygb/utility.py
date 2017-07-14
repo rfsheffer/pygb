@@ -46,37 +46,7 @@ class RomInfo:
     Rom Information,
     """
 
-    # Cartridge type capabilities
-    # Capabilities are split with the + symbol
-    cartridge_type_caps = {
-        0x00: "ROM ONLY",
-        0x01: "ROM+MBC1",
-        0x02: "ROM+MBC1+RAM",
-        0x03: "ROM+MBC1+RAM+BATT",
-        0x05: "ROM+MBC2",
-        0x06: "ROM+MBC2+BATTERY",
-        0x08: "ROM+RAM",
-        0x09: "ROM+RAM+BATTERY",
-        0x0B: "ROM+MMM01",
-        0x0C: "ROM+MMM01+SRAM",
-        0x0D: "ROM+MMM01+SRAM+BATT",
-        0x0F: "ROM+MBC3+TIMER+BATT",
-        0x10: "ROM+MBC3+TIMER+RAM+BATT",
-        0x11: "ROM+MBC3",
-        0x12: "ROM+MBC3+RAM",
-        0x13: "ROM+MBC3+RAM+BATT",
-        0x19: "ROM+MBC5",
-        0x1A: "ROM+MBC5+RAM",
-        0x1B: "ROM+MBC5+RAM+BATT",
-        0x1C: "ROM+MBC5+RUMBLE",
-        0x1D: "ROM+MBC5+RUMBLE+SRAM",
-        0x1E: "ROM+MBC5+RUMBLE+SRAM+BATT",
-        0x1F: "Pocket Camera",
-        0xFD: "Bandai+TAMA5",
-        0xFE: "Hudson+HuC-3",
-        0xFF: "Hudson+HuC-1"
-    }
-
+    # A bank is 16kb wide, so just divide the rom size kb by 16kb to get the number of banks
     rom_sizes_bits_banks = {
         0x00: (256000, 2),
         0x01: (512000, 4),
@@ -90,6 +60,8 @@ class RomInfo:
         0x54: (12000000, 96),
     }
 
+    # ram banks are 8kb wide, so just divide the ram size kb by 8kb to get the number of banks
+    # Note that some of the size indicies represent less than a total bank size, hence the two 1 bank entries.
     ram_sizes_bits_banks = {
         0x00: (0, 0),
         0x01: (16000, 1),
@@ -118,7 +90,8 @@ class RomInfo:
         print('Color: %s' % ('color' if self.is_color else 'B&W'))
         print('License: %s' % self.license)
         print('HW Type: %s' % ('Super GB' if self.super_gb else 'Normal'))
-        print('Cartridge Type: %s' % self.cartridge_type_caps[self.cart_type])
+        from pygb.memory.memory import rom_memory_bank_types
+        print('Cartridge Type: %s' % rom_memory_bank_types[self.cart_type])
         print('Rom Size: %s' % (self.get_size_desc(self.rom_size, self.rom_sizes_bits_banks[self.rom_size])))
         print('Ram Size: %s' % (self.get_size_desc(self.ram_size, self.ram_sizes_bits_banks[self.ram_size])))
         print('Destination Code: %s' % ('Japanese' if self.destination_code == 0 else 'Non-Japanese'))

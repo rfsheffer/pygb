@@ -29,6 +29,8 @@ from pygb.cpu import registers
 from pygb.memory.memory import MemoryPool
 from pygb.cpu.instructions.instructions import instructions
 
+from pygb.cpu.instructions.misc import nop
+
 
 class Capabilities:
     cpu_clock_mhz = 4.194304
@@ -55,13 +57,18 @@ class CPU:
         self.registers.set_pc(0x0100)
 
     def step(self):
-        op_code = self.memory.read_byte(self.registers.inc_pc())
+        cur_pc = self.registers.get_pc()
+        self.registers.inc_pc()
+        op_code = self.memory.read_byte(cur_pc)
         if len(instructions) <= op_code:
             raise Exception('Instruction op-code was beyond our op-code range!')
 
         instruction = instructions[op_code]
         print("%02X - " % op_code, end='')
+        if op_code != 0x00 and instruction.execute is nop:
+            raise(Exception('Unhandled op code!'))
         instruction.execute(instruction, self.registers, self.memory, True)
+        self.registers.print_registers()
 
         # Call Steps:
         # operand = 0

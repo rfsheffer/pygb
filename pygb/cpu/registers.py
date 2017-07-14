@@ -28,6 +28,25 @@ from ctypes import c_ubyte, c_ushort, Union, Structure
 from pygb.settings import DEBUG
 
 
+# Defined registers as indicies like an enum, so an index can be passed around to reduce duplicate code
+class IReg:
+    REGISTER_A = 0
+    REGISTER_B = 1
+    REGISTER_C = 2
+    REGISTER_D = 3
+    REGISTER_E = 4
+    REGISTER_H = 5
+    REGISTER_L = 6
+    REGISTER_F = 7
+    REGISTER_SP = 8
+    REGISTER_PC = 9
+    # combinations
+    REGISTER_AF = 10
+    REGISTER_BC = 11
+    REGISTER_DE = 12
+    REGISTER_HL = 13
+
+
 # C Type Declarations
 class AF(Structure):
     _fields_ = [("f", c_ubyte), ("a", c_ubyte)]
@@ -98,6 +117,10 @@ class RegisterBank:
         self._af.afu.a = self.do_inc(self._af.afu.a)
         return self._af.afu.a
 
+    def dec_a(self):
+        self._af.afu.a -= 1
+        return self._af.afu.a
+
     def get_f(self):
         return self._af.afu.f
 
@@ -109,11 +132,23 @@ class RegisterBank:
         self._af.afu.f = self.do_inc(self._af.afu.f)
         return self._af.afu.f
 
+    def dec_f(self):
+        self._af.afu.f -= 1
+        return self._af.afu.f
+
     def get_af(self):
         return self._af.af
 
     def set_af(self, val):
         self._af.af = val
+
+    def inc_af(self):
+        self._af.af += 1
+        return self._af.af
+
+    def dec_af(self):
+        self._af.af -= 1
+        return self._af.af
 
     def get_zero_flag(self):
         """
@@ -186,6 +221,10 @@ class RegisterBank:
         self._bc.bcu.b = self.do_inc(self._bc.bcu.b)
         return self._bc.bcu.b
 
+    def dec_b(self):
+        self._bc.bcu.b -= 1
+        return self._bc.bcu.b
+
     def get_c(self):
         return self._bc.bcu.c
 
@@ -196,11 +235,21 @@ class RegisterBank:
         self._bc.bcu.c = self.do_inc(self._bc.bcu.c)
         return self._bc.bcu.c
 
+    def dec_c(self):
+        self._bc.bcu.c -= 1
+        return self._bc.bcu.c
+
     def get_bc(self):
         return self._bc.bc
 
     def set_bc(self, val):
         self._bc.bc = val
+
+    def inc_bc(self):
+        self._bc.bc += 1
+
+    def dec_bc(self):
+        self._bc.bc -= 1
 
     """
      D and E REGISTERS
@@ -215,6 +264,10 @@ class RegisterBank:
         self._de.deu.d = self.do_inc(self._de.deu.d)
         return self._de.deu.d
 
+    def dec_d(self):
+        self._de.deu.d -= 1
+        return self._de.deu.d
+
     def get_e(self):
         return self._de.deu.e
 
@@ -225,11 +278,23 @@ class RegisterBank:
         self._de.deu.e = self.do_inc(self._de.deu.e)
         return self._de.deu.e
 
+    def dec_e(self):
+        self._de.deu.e -= 1
+        return self._de.deu.e
+
     def get_de(self):
         return self._de.de
 
     def set_de(self, val):
         self._de.de = val
+
+    def inc_de(self):
+        self._de.de += 1
+        return self._de.de
+
+    def dec_de(self):
+        self._de.de -= 1
+        return self._de.de
 
     """
      H and L REGISTERS
@@ -244,6 +309,10 @@ class RegisterBank:
         self._hl.hlu.h = self.do_inc(self._hl.hlu.h)
         return self._hl.hlu.h
 
+    def dec_h(self):
+        self._hl.hlu.h -= 1
+        return self._hl.hlu.h
+
     def get_l(self):
         return self._hl.hlu.l
 
@@ -254,11 +323,172 @@ class RegisterBank:
         self._hl.hlu.l = self.do_inc(self._hl.hlu.l)
         return self._hl.hlu.l
 
+    def dec_l(self):
+        self._hl.hlu.l -= 1
+        return self._hl.hlu.l
+
     def get_hl(self):
         return self._hl.hl
 
     def set_hl(self, val):
         self._hl.hl = val
+
+    def inc_hl(self):
+        self._hl.hl += 1
+        return self._hl.hl
+
+    def dec_hl(self):
+        self._hl.hl -= 1
+        return self._hl.hl
+
+    """
+     Generic Calls
+    """
+    def set_reg(self, reg_index, value):
+        """
+        Set a register by register index
+        :param reg_index: The index in IReg
+        :param value: The value to set
+        """
+        if reg_index == IReg.REGISTER_A:
+            self.set_a(value)
+        elif reg_index == IReg.REGISTER_B:
+            self.set_b(value)
+        elif reg_index == IReg.REGISTER_C:
+            self.set_c(value)
+        elif reg_index == IReg.REGISTER_D:
+            self.set_d(value)
+        elif reg_index == IReg.REGISTER_E:
+            self.set_e(value)
+        elif reg_index == IReg.REGISTER_H:
+            self.set_h(value)
+        elif reg_index == IReg.REGISTER_L:
+            self.set_l(value)
+        elif reg_index == IReg.REGISTER_F:
+            self.set_f(value)
+        elif reg_index == IReg.REGISTER_SP:
+            self.set_sp(value)
+        elif reg_index == IReg.REGISTER_PC:
+            self.set_pc(value)
+        elif reg_index == IReg.REGISTER_AF:
+            self.set_af(value)
+        elif reg_index == IReg.REGISTER_BC:
+            self.set_bc(value)
+        elif reg_index == IReg.REGISTER_DE:
+            self.set_de(value)
+        elif reg_index == IReg.REGISTER_HL:
+            self.set_hl(value)
+        else:
+            raise Exception('Unknown register set!')
+
+    def get_reg(self, reg_index):
+        """
+        Get a register by register index
+        :param reg_index: The index in IReg
+        :return The current register value
+        """
+        if reg_index == IReg.REGISTER_A:
+            return self.get_a()
+        elif reg_index == IReg.REGISTER_B:
+            return self.get_b()
+        elif reg_index == IReg.REGISTER_C:
+            return self.get_c()
+        elif reg_index == IReg.REGISTER_D:
+            return self.get_d()
+        elif reg_index == IReg.REGISTER_E:
+            return self.get_e()
+        elif reg_index == IReg.REGISTER_H:
+            return self.get_h()
+        elif reg_index == IReg.REGISTER_L:
+            return self.get_l()
+        elif reg_index == IReg.REGISTER_F:
+            return self.get_f()
+        elif reg_index == IReg.REGISTER_SP:
+            return self.get_sp()
+        elif reg_index == IReg.REGISTER_PC:
+            return self.get_pc()
+        elif reg_index == IReg.REGISTER_AF:
+            return self.get_af()
+        elif reg_index == IReg.REGISTER_BC:
+            return self.get_bc()
+        elif reg_index == IReg.REGISTER_DE:
+            return self.get_de()
+        elif reg_index == IReg.REGISTER_HL:
+            return self.get_hl()
+        else:
+            raise Exception('Unknown register set!')
+
+    def inc_reg(self, reg_index):
+        """
+        Increment a register by register index
+        :param reg_index: The index in IReg
+        """
+        if reg_index == IReg.REGISTER_A:
+            return self.inc_a()
+        elif reg_index == IReg.REGISTER_B:
+            return self.inc_b()
+        elif reg_index == IReg.REGISTER_C:
+            return self.inc_c()
+        elif reg_index == IReg.REGISTER_D:
+            return self.inc_d()
+        elif reg_index == IReg.REGISTER_E:
+            return self.inc_e()
+        elif reg_index == IReg.REGISTER_H:
+            return self.inc_h()
+        elif reg_index == IReg.REGISTER_L:
+            return self.inc_l()
+        elif reg_index == IReg.REGISTER_F:
+            return self.inc_f()
+        elif reg_index == IReg.REGISTER_SP:
+            return self.inc_sp()
+        elif reg_index == IReg.REGISTER_PC:
+            return self.inc_pc()
+        elif reg_index == IReg.REGISTER_AF:
+            return self.inc_af()
+        elif reg_index == IReg.REGISTER_BC:
+            return self.inc_bc()
+        elif reg_index == IReg.REGISTER_DE:
+            return self.inc_de()
+        elif reg_index == IReg.REGISTER_HL:
+            return self.inc_hl()
+        else:
+            raise Exception('Unknown register set!')
+
+    def dec_reg(self, reg_index):
+        """
+        Decrement a register by register index
+        :param reg_index: The index in IReg
+        """
+        if reg_index == IReg.REGISTER_A:
+            return self.dec_a()
+        elif reg_index == IReg.REGISTER_B:
+            return self.dec_b()
+        elif reg_index == IReg.REGISTER_C:
+            return self.dec_c()
+        elif reg_index == IReg.REGISTER_D:
+            return self.dec_d()
+        elif reg_index == IReg.REGISTER_E:
+            return self.dec_e()
+        elif reg_index == IReg.REGISTER_H:
+            return self.dec_h()
+        elif reg_index == IReg.REGISTER_L:
+            return self.dec_l()
+        elif reg_index == IReg.REGISTER_F:
+            return self.dec_f()
+        elif reg_index == IReg.REGISTER_SP:
+            return self.dec_sp()
+        elif reg_index == IReg.REGISTER_PC:
+            return self.dec_pc()
+        elif reg_index == IReg.REGISTER_AF:
+            return self.dec_af()
+        elif reg_index == IReg.REGISTER_BC:
+            return self.dec_bc()
+        elif reg_index == IReg.REGISTER_DE:
+            return self.dec_de()
+        elif reg_index == IReg.REGISTER_HL:
+            return self.dec_hl()
+        else:
+            raise Exception('Unknown register set!')
 
     """
      Stack Pointer
@@ -268,6 +498,12 @@ class RegisterBank:
 
     def set_sp(self, val):
         self._sp = val
+
+    def inc_sp(self):
+        self._sp += 1
+
+    def dec_sp(self):
+        self._sp -= 1
 
     """
      Program Counter
@@ -283,11 +519,19 @@ class RegisterBank:
         """
         Increment the program counter
         :param num: Num steps
-        :return: The program counter value before increment
+        :return: The program counter value after increment
         """
-        pc_out = self._pc
         self._pc += num
-        return pc_out
+        return self._pc
+
+    def dec_pc(self, num=1):
+        """
+        Decrement the program counter
+        :param num: Num steps
+        :return: The program counter value after decrement
+        """
+        self._pc += num
+        return self._pc
 
     def set_pc(self, val):
         """
@@ -295,6 +539,19 @@ class RegisterBank:
         :param val: The value to be set as the current program counter
         """
         self._pc = val
+
+    def print_registers(self):
+        print('af= 0x%04X, '
+              'bc= 0x%04X, '
+              'de= 0x%04X, '
+              'hl= 0x%04X, '
+              'sp= 0x%04X, '
+              'pc= 0x%04X' % (self.get_af(), self.get_bc(), self.get_de(), self.get_hl(), self.get_sp(), self.get_pc()))
+
+        print('z: {}, n: {}, h: {}, c {}'.format('True' if self.get_zero_flag() else 'False',
+                                                 'True' if self.get_subtract_flag() else 'False',
+                                                 'True' if self.get_half_carry_flag() else 'False',
+                                                 'True' if self.get_carry_flag() else 'False'))
 
 
 class RegistersException(Exception):
