@@ -25,10 +25,18 @@ SOFTWARE.
 """
 
 
-def jp_nn(inst, reg, mem, debug):
+def jp_nn(inst, reg, mem):
     """ Jump to address nn """
-    operand = mem.read_short(reg.get_pc())
-    reg.inc_pc(2)
-    reg.set_pc(operand)
-    if debug:
-        print(inst.disassembly % operand)
+    reg.set_pc(mem.read_short(reg.get_reg(inst.r1[0])))
+
+
+def jr_nz_n(inst, reg, mem):
+    """ Jump only if Zero flag is not set (not zero)"""
+    if not reg.get_zero_flag():
+        # Jump from where we are, plus operand
+        value = mem.read_byte(reg.get_reg(inst.r1[0]))
+        # Signed is used here....
+        if value > 127:
+            value = -(256 - value)
+        reg.inc_pc(value)
+    reg.inc_pc(1)  # We always increment the PC, simulating the operand jump

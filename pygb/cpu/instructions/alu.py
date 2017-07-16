@@ -26,60 +26,62 @@ SOFTWARE.
 from pygb.cpu.registers import IReg
 
 
-def inc_a(inst, reg, mem, debug):
-    """ Increment register A """
-    reg.inc_a()
-    if debug:
-        print(inst.disassembly)
+def inc_r1(inst, reg, mem):
+    """ Increment register 1 """
+    if inst.r1[1]:
+        # inc (r1)
+        val = mem.read_byte(reg.get_reg(inst.r1[0]))
+        mem.write_byte(reg.get_reg(inst.r1[0]), reg.do_inc(val))
+    else:
+        # inc r1
+        reg.inc_reg(inst.r1[0])
 
 
-def inc_b(inst, reg, mem, debug):
+def dec_r1(inst, reg, mem):
+    """ Decrement register 1 """
+    if inst.r1[1]:
+        # inc (r1)
+        val = mem.read_byte(reg.get_reg(inst.r1[0]))
+        mem.write_byte(reg.get_reg(inst.r1[0]), reg.do_dec(val))
+    else:
+        # inc r1
+        reg.dec_reg(inst.r1[0])
+
+
+
+def inc_b(inst, reg, mem):
     """ Increment register B """
     reg.inc_b()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_c(inst, reg, mem, debug):
+def inc_c(inst, reg, mem):
     """ Increment register C """
     reg.inc_c()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_d(inst, reg, mem, debug):
+def inc_d(inst, reg, mem):
     """ Increment register D """
     reg.inc_d()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_e(inst, reg, mem, debug):
+def inc_e(inst, reg, mem):
     """ Increment register E """
     reg.inc_e()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_h(inst, reg, mem, debug):
+def inc_h(inst, reg, mem):
     """ Increment register H """
     reg.inc_h()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_l(inst, reg, mem, debug):
+def inc_l(inst, reg, mem):
     """ Increment register L """
     reg.inc_l()
-    if debug:
-        print(inst.disassembly)
 
 
-def inc_hlp(inst, reg, mem, debug):
+def inc_hlp(inst, reg, mem):
     """ Increment register (HL) """
     mem.write_byte(reg.get_hl(), reg.do_inc(mem.read_byte(reg.get_hl())))
-    if debug:
-        print(inst.disassembly)
 
 
 '''
@@ -88,9 +90,7 @@ BITWISE OPERATORS
 '''
 
 
-def xor_n(inst, reg, mem, debug):
-    debug_val = 0
-
+def xor_n(inst, reg, mem):
     def xor_a(value):
         reg.set_a(reg.get_a() ^ value)
         # Reset all flags
@@ -99,29 +99,7 @@ def xor_n(inst, reg, mem, debug):
         if reg.get_a() == 0:
             reg.set_zero_flag(True)
 
-    if inst.reg_r1[0] == IReg.REGISTER_A:
-        xor_a(reg.get_a())
-    elif inst.reg_r1[0] == IReg.REGISTER_B:
-        xor_a(reg.get_b())
-    elif inst.reg_r1[0] == IReg.REGISTER_C:
-        xor_a(reg.get_c())
-    elif inst.reg_r1[0] == IReg.REGISTER_D:
-        xor_a(reg.get_d())
-    elif inst.reg_r1[0] == IReg.REGISTER_E:
-        xor_a(reg.get_e())
-    elif inst.reg_r1[0] == IReg.REGISTER_H:
-        xor_a(reg.get_h())
-    elif inst.reg_r1[0] == IReg.REGISTER_L:
-        xor_a(reg.get_l())
-    elif inst.reg_r1[0] == IReg.REGISTER_HL:
-        xor_a(mem.read_byte(reg.get_hl()))
-    elif inst.reg_r1[0] == IReg.REGISTER_PC:
-        debug_val = mem.read_byte(reg.get_pc())
-        reg.inc_pc(1)
-        xor_a(debug_val)
-
-    if debug:
-        if inst.reg_r1[0] == IReg.REGISTER_PC:
-            print(inst.disassembly % debug_val)
-        else:
-            print(inst.disassembly)
+    if inst.r1[1]:
+        xor_a(mem.read_byte(reg.get_reg(inst.r1[0])))
+    else:
+        xor_a(reg.get_reg(inst.r1[0]))

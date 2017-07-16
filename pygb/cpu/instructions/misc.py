@@ -25,7 +25,6 @@ SOFTWARE.
 """
 
 
-def nop(inst, reg, mem, debug):
+def nop(inst, reg, mem):
     """ NO OPERATION """
-    if debug:
-        print(inst.disassembly)
+    pass

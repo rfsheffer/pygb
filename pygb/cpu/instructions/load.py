@@ -25,165 +25,49 @@ SOFTWARE.
 """
 from pygb.cpu.registers import IReg
 
-# ------------------------------------------------------------------
-# LOAD into C
-
-
-def ld_c_d(inst, reg, mem, debug):
-    """ Load D into C """
-    reg.set_c(reg.get_d())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_c_e(inst, reg, mem, debug):
-    """ Load E into C """
-    reg.set_c(reg.get_e())
-    if debug:
-        print(inst.disassembly)
-
-
-# ------------------------------------------------------------------
-# LOAD into D
-
-
-def ld_d_a(inst, reg, mem, debug):
-    """ Load A into D """
-    reg.set_d(reg.get_a())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_d_b(inst, reg, mem, debug):
-    """ Load B into D """
-    reg.set_d(reg.get_b())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_d_c(inst, reg, mem, debug):
-    """ Load C into D """
-    reg.set_d(reg.get_c())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_d_e(inst, reg, mem, debug):
-    """ Load E into D """
-    reg.set_d(reg.get_e())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_d_l(inst, reg, mem, debug):
-    """ Load L into D """
-    reg.set_d(reg.get_l())
-    if debug:
-        print(inst.disassembly)
-
-
-def ld_d_hlp(inst, reg, mem, debug):
-    """ Load (HL) into D """
-    reg.set_d(mem.read_byte(reg.get_hl()))
-    if debug:
-        print(inst.disassembly)
-
-
-# ------------------------------------------------------------------
-# LOAD into E
-
-
-def ld_e_b(inst, reg, mem, debug):
-    """ Load B into E """
-    reg.set_e(reg.get_b())
-    if debug:
-        print(inst.disassembly)
-
-
-# ------------------------------------------------------------------
-# LOAD into L
-
-
-def ld_l_h(inst, reg, mem, debug):
-    """ Load H into L """
-    reg.set_l(reg.get_h())
-    if debug:
-        print(inst.disassembly)
-
 '''
 ------------------------------------------------------------------
-LOAD CALLS 8bit
+LOAD CALLS 8bit or 16bit via function swap
 '''
 
 
-def ld_r1_r2(inst, reg, mem, debug):
+def ld_r1_r2(inst, reg, mem):
     """ Put value r2 into r1. """
-    if inst.reg_r1[1]:
+    read_func = mem.read_byte
+    if inst.operand_len == 2:
+        read_func = mem.read_short
+
+    if inst.r1[1]:
         # r2 to (r1)
-        val = reg.get_reg(inst.reg_r2[0])
-        if inst.reg_r2[1]:
+        val = reg.get_reg(inst.r2[0])
+        if inst.r2[1]:
             # (r2) to (r1)
-            val = mem.read_byte(val)
-        mem.write_byte(reg.get_reg(inst.reg_r1[0]), val)
-    elif inst.reg_r2[1]:
+            val = read_func(val)
+        mem.write_byte(reg.get_reg(inst.r1[0]), val)
+    elif inst.r2[1]:
         # (r2) to r1
-        val = mem.read_byte(reg.get_reg(inst.reg_r2[0]))
-        reg.set_reg(inst.reg_r1[0], val)
+        val = read_func(reg.get_reg(inst.r2[0]))
+        reg.set_reg(inst.r1[0], val)
     else:
         # General r2 to r1
-        reg.set_reg(inst.reg_r1[0], reg.get_reg(inst.reg_r2[0]))
+        reg.set_reg(inst.r1[0], reg.get_reg(inst.r2[0]))
 
 
-def ld_nn_n(inst, reg, mem, debug):
-    """ Put value NN into N """
-    value = mem.read_byte(reg.get_pc())
-    reg.inc_pc(1)
-
-    if inst.reg_r1[0] == IReg.REGISTER_B:
-        reg.set_b(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_C:
-        reg.set_c(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_D:
-        reg.set_d(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_E:
-        reg.set_e(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_H:
-        reg.set_h(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_L:
-        reg.set_l(value)
-
-    if debug:
-        print(inst.disassembly % value)
-
-
-def ldd_hlp_a(inst, reg, mem, debug):
+def ldd_hlp_a(inst, reg, mem):
     """ load A into (HL) then decrement HL """
     mem.write_byte(reg.get_hl(), reg.get_a())
     reg.dec_hl()
 
-    if debug:
-        print(inst.disassembly)
 
-
-'''
-------------------------------------------------------------------
-LOAD CALLS 16bit
-'''
-
-
-def ld_n_nn(inst, reg, mem, debug):
-    """ Put value NN into N """
-    value = mem.read_short(reg.get_pc())
-    reg.inc_pc(2)
-
-    if inst.reg_r1[0] == IReg.REGISTER_BC:
-        reg.set_bc(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_DE:
-        reg.set_de(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_HL:
-        reg.set_hl(value)
-    elif inst.reg_r1[0] == IReg.REGISTER_SP:
-        reg.set_sp(value)
-
-    if debug:
-        print(inst.disassembly % value)
+# def ld_r1_nn(inst, reg, mem):
+#     """ Put value NN into R1 """
+#     value = mem.read_short(reg.get_reg(inst.r2[0]))
+#
+#     if inst.r1[0] == IReg.REGISTER_BC:
+#         reg.set_bc(value)
+#     elif inst.r1[0] == IReg.REGISTER_DE:
+#         reg.set_de(value)
+#     elif inst.r1[0] == IReg.REGISTER_HL:
+#         reg.set_hl(value)
+#     elif inst.r1[0] == IReg.REGISTER_SP:
+#         reg.set_sp(value)

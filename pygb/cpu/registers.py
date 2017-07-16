@@ -92,6 +92,15 @@ class RegisterBank:
         self._sp = 0
         self._pc = 0
 
+    #     # A special register which holds the current immediate program counter value in memory.
+    #     # This depends entirely on the instruction which is currently executing. If an instruction
+    #     # does not require the program counter immediate value, this will be set to 0.
+    #     # HINT: This is set by the CPU
+    #     self.immediate = 0
+    #
+    # def get_operand(self):
+    #     return self.immediate
+
     def do_inc(self, val):
         """
         On increment, certain register flags get set
@@ -102,6 +111,18 @@ class RegisterBank:
         val += 1
         self.set_zero_flag(val == 0)
         self.set_subtract_flag(False)
+        return val
+
+    def do_dec(self, val):
+        """
+        On decrement, certain register flags get set
+        :param val: The value to increment
+        :return: The value after being incremented
+        """
+        self.set_half_carry_flag(not (val & 0x0F))
+        val -= 1
+        self.set_zero_flag(val == 0)
+        self.set_subtract_flag(True)
         return val
 
     """
@@ -118,7 +139,7 @@ class RegisterBank:
         return self._af.afu.a
 
     def dec_a(self):
-        self._af.afu.a -= 1
+        self._af.afu.a = self.do_dec(self._af.afu.a)
         return self._af.afu.a
 
     def get_f(self):
@@ -133,7 +154,7 @@ class RegisterBank:
         return self._af.afu.f
 
     def dec_f(self):
-        self._af.afu.f -= 1
+        self._af.afu.f = self.do_dec(self._af.afu.f)
         return self._af.afu.f
 
     def get_af(self):
@@ -163,7 +184,7 @@ class RegisterBank:
         if state:
             self.set_f(self.get_f() | 0x80)
         else:
-            self.set_f(self.get_f() ^ 0x80)
+            self.set_f(self.get_f() & ~0x80)
 
     def get_subtract_flag(self):
         """
@@ -177,7 +198,7 @@ class RegisterBank:
         if state:
             self.set_f(self.get_f() | 0x40)
         else:
-            self.set_f(self.get_f() ^ 0x40)
+            self.set_f(self.get_f() & ~0x40)
 
     def get_half_carry_flag(self):
         """
@@ -191,7 +212,7 @@ class RegisterBank:
         if state:
             self.set_f(self.get_f() | 0x20)
         else:
-            self.set_f(self.get_f() ^ 0x20)
+            self.set_f(self.get_f() & ~0x20)
 
     def get_carry_flag(self):
         """
@@ -206,7 +227,7 @@ class RegisterBank:
         if state:
             self.set_f(self.get_f() | 0x10)
         else:
-            self.set_f(self.get_f() ^ 0x10)
+            self.set_f(self.get_f() & ~0x10)
 
     """
      B and C REGISTERS
@@ -222,7 +243,7 @@ class RegisterBank:
         return self._bc.bcu.b
 
     def dec_b(self):
-        self._bc.bcu.b -= 1
+        self._bc.bcu.b = self.do_dec(self._bc.bcu.b)
         return self._bc.bcu.b
 
     def get_c(self):
@@ -236,7 +257,7 @@ class RegisterBank:
         return self._bc.bcu.c
 
     def dec_c(self):
-        self._bc.bcu.c -= 1
+        self._bc.bcu.c = self.do_dec(self._bc.bcu.c)
         return self._bc.bcu.c
 
     def get_bc(self):
@@ -265,7 +286,7 @@ class RegisterBank:
         return self._de.deu.d
 
     def dec_d(self):
-        self._de.deu.d -= 1
+        self._de.deu.d = self.do_dec(self._de.deu.d)
         return self._de.deu.d
 
     def get_e(self):
@@ -279,7 +300,7 @@ class RegisterBank:
         return self._de.deu.e
 
     def dec_e(self):
-        self._de.deu.e -= 1
+        self._de.deu.e = self.do_dec(self._de.deu.e)
         return self._de.deu.e
 
     def get_de(self):
@@ -310,7 +331,7 @@ class RegisterBank:
         return self._hl.hlu.h
 
     def dec_h(self):
-        self._hl.hlu.h -= 1
+        self._hl.hlu.h = self.do_dec(self._hl.hlu.h)
         return self._hl.hlu.h
 
     def get_l(self):
@@ -324,7 +345,7 @@ class RegisterBank:
         return self._hl.hlu.l
 
     def dec_l(self):
-        self._hl.hlu.l -= 1
+        self._hl.hlu.l = self.do_dec(self._hl.hlu.l)
         return self._hl.hlu.l
 
     def get_hl(self):

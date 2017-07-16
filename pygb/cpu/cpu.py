@@ -29,8 +29,8 @@ from pygb.cpu import registers
 from pygb.memory.memory import MemoryPool
 from pygb.cpu.instructions.instructions import instructions
 
+from pygb.settings import DEBUG
 from pygb.cpu.instructions.misc import nop
-
 
 class Capabilities:
     cpu_clock_mhz = 4.194304
@@ -64,22 +64,31 @@ class CPU:
             raise Exception('Instruction op-code was beyond our op-code range!')
 
         instruction = instructions[op_code]
-        print("%02X - " % op_code, end='')
         if op_code != 0x00 and instruction.execute is nop:
-            raise(Exception('Unhandled op code!'))
-        instruction.execute(instruction, self.registers, self.memory, True)
-        self.registers.print_registers()
+            raise(Exception('Unhandled op code 0x%02X!' % op_code))
 
-        # Call Steps:
-        # operand = 0
-        # if instruction.num_operands == 1:
-        #     operand = self.memory.read_byte(self.registers.get_pc())
-        #     self.registers.inc_pc()
-        #     execute(operand)
-        # elif instruction.num_operands == 2:
-        #     operand = self.memory.read_short(self.registers.get_pc())
-        #     self.registers.inc_pc(2)
-        #     execute(operand)
-        # else:
-        #     # 2 max, so any other call is one parm
-        #     pass
+        if DEBUG:
+            operand = 0
+            if instruction.operand_len == 1:
+                operand = self.memory.read_byte(self.registers.get_pc())
+            elif instruction.operand_len == 2:
+                operand = self.memory.read_short(self.registers.get_pc())
+
+            print("%02X - " % op_code, end='')
+            if instruction.operand_len:
+                print(instruction.disassembly % operand)
+            else:
+                print(instruction.disassembly)
+
+        # Execute the CPU instruction
+        instruction.execute(instruction, self.registers, self.memory)
+
+        # Increment the program counter by the operand length (jumping over the operand)
+        # We post increment because our instructions read (PC) like any other register
+        # and we do not want the PC to be incremented before the instruction or it will dereference
+        # to the wrong value. Some instructions change the PC such as JP, so we ignore increment in those cases.
+        if not instruction.changes_pc:
+            self.registers.inc_pc(instruction.operand_len)
+
+        if DEBUG:
+            self.registers.print_registers()
