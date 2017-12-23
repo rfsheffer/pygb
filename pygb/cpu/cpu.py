@@ -25,12 +25,13 @@ SOFTWARE.
 """
 
 
-from pygb.cpu import registers
+from pygb.cpu import registers, interrupt
 from pygb.memory.memory import MemoryPool
 from pygb.cpu.instructions.instructions import instructions
 
 from pygb.settings import DEBUG
 from pygb.cpu.instructions.misc import nop
+
 
 class Capabilities:
     cpu_clock_mhz = 4.194304
@@ -40,6 +41,11 @@ class CPU:
     def __init__(self, memory_space):
         self.registers = registers.RegisterBank()
         self.memory = memory_space  # type: MemoryPool
+        self.interrupts = interrupt.Interrupts()
+
+        # Setup the special instructions for enabling and disabling interrupt routines
+        instructions[0xFB].execute = self.enable_interrupts
+        instructions[0xF3].execute = self.disable_interrupts
 
     def reset(self):
         # Setup the registers
@@ -55,6 +61,12 @@ class CPU:
 
         # On power up, the GameBoy Program Counter is initialized to 0x100
         self.registers.set_pc(0x0100)
+
+    def enable_interrupts(self, inst, reg, mem):
+        self.interrupts.IME = 0x1
+
+    def disable_interrupts(self, inst, reg, mem):
+        self.interrupts.IME = 0x0
 
     def step(self):
         cur_pc = self.registers.get_pc()
@@ -82,6 +94,8 @@ class CPU:
 
         # Execute the CPU instruction
         instruction.execute(instruction, self.registers, self.memory)
+
+        self.interrupts.step(self.memory)
 
         # Increment the program counter by the operand length (jumping over the operand)
         # We post increment because our instructions read (PC) like any other register

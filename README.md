@@ -22,3 +22,12 @@ How to Run
 -------
 * Clone this repository
 * Run python3 main.py --rom "Path to the rom you want to run"
+
+References
+-------
+* https://cturt.github.io/cinoop.html
+* http://www.worldofspectrum.org/faq/reference/z80reference.htm#DAA
+* http://www.z80.info
+* http://imrannazar.com/GameBoy-Z80-Opcode-Map
+* http://gameboy.mongenel.com/dmg/opcodes.html
+* http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf

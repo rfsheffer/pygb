@@ -48,7 +48,6 @@ def dec_r1(inst, reg, mem):
         reg.dec_reg(inst.r1[0])
 
 
-
 def inc_b(inst, reg, mem):
     """ Increment register B """
     reg.inc_b()

@@ -35,7 +35,13 @@ class Instruction:
     """
     An Instruction of the CPU
     """
-    def __init__(self, disassembly:str, cycles, execute, r1=None, r2=None, operand_len=0, changes_pc=False):
+    def __init__(self,
+                 disassembly:str,
+                 cycles,
+                 execute,
+                 r1=None, r2=None,
+                 operand_len=0,
+                 changes_pc=False):
         # For convenience and debug, the disassembly
         self.disassembly = disassembly
 
@@ -47,7 +53,7 @@ class Instruction:
         self.execute = execute
 
         # Registers to change, left side and right side
-        # These values are a tupple : (register_index:int, is_pointer:bool)
+        # These values are a tuple : (register_index:int, is_pointer:bool)
         self.r1 = r1
         self.r2 = r2
 
@@ -304,7 +310,7 @@ instructions = [
     Instruction("Unknown : F0",  0,  pygb.cpu.instructions.misc.nop),   # 0xF0
     Instruction("Unknown : F1",  0,  pygb.cpu.instructions.misc.nop),   # 0xF1
     Instruction("Unknown : F2",  0,  pygb.cpu.instructions.misc.nop),   # 0xF2
-    Instruction("Unknown : F3",  0,  pygb.cpu.instructions.misc.nop),   # 0xF3
+    Instruction("DI",            4,  pygb.cpu.instructions.misc.nop),   # 0xF3
     Instruction("Unknown : F4",  0,  pygb.cpu.instructions.misc.nop),   # 0xF4
     Instruction("Unknown : F5",  0,  pygb.cpu.instructions.misc.nop),   # 0xF5
     Instruction("Unknown : F6",  0,  pygb.cpu.instructions.misc.nop),   # 0xF6
@@ -312,7 +318,7 @@ instructions = [
     Instruction("Unknown : F8",  0,  pygb.cpu.instructions.misc.nop),   # 0xF8
     Instruction("Unknown : F9",  0,  pygb.cpu.instructions.misc.nop),   # 0xF9
     Instruction("LD A, 0x%04X",  16, pygb.cpu.instructions.load.ld_r1_r2, (IReg.REGISTER_A, False), (IReg.REGISTER_PC, True), 2),   # 0xFA
-    Instruction("Unknown : FB",  0,  pygb.cpu.instructions.misc.nop),   # 0xFB
+    Instruction("EI",            4,  pygb.cpu.instructions.misc.nop),   # 0xFB
     Instruction("Unknown : FC",  0,  pygb.cpu.instructions.misc.nop),   # 0xFC
     Instruction("Unknown : FD",  0,  pygb.cpu.instructions.misc.nop),   # 0xFD
     Instruction("Unknown : FE",  0,  pygb.cpu.instructions.misc.nop),   # 0xFE

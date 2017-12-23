@@ -169,7 +169,7 @@ class MemoryPool:
     """
 
     # Max memory address space for the GameBoy
-    MAX_POOL_SIZE = 0xFFFF
+    MAX_POOL_SIZE = 0x10000
 
     def __init__(self):
         # Rom Bytes
@@ -235,7 +235,7 @@ class MemoryPool:
         :param address: The address changed
         """
         if address < 0 or address >= MemoryPool.MAX_POOL_SIZE:
-            raise MemoryException('Invalid Memory Address beyond memory address space! {0}')
+            raise MemoryException('Invalid Memory Address beyond memory address space! {:02X}'.format(address))
 
     def read_byte(self, address):
         """
