@@ -26,6 +26,23 @@ SOFTWARE.
 
 import struct
 
+class GBTypes:
+    gameboy_classic = 0
+    gameboy_super = 1
+    gameboy_color = 2
+    gameboy_pocket = 3
+
+def gb_type_select_var(gb_type, gb, sgb, gbp, gbc):
+    if gb_type == GBTypes.gameboy_classic:
+        return gb
+    elif gb_type == GBTypes.gameboy_super:
+        return sgb
+    elif gb_type == GBTypes.gameboy_pocket:
+        return gbp
+    elif gb_type == GBTypes.gameboy_color:
+        return gbc
+    raise Exception('Invalid GB Type passed to gb_type_select_var!')
+
 
 def get_size_to_pretty(the_size, in_bits=False):
     """

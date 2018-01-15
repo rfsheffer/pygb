@@ -562,14 +562,14 @@ class RegisterBank:
         self._pc = val
 
     def print_registers(self):
-        print('af= 0x%04X, '
+        print('\taf= 0x%04X, '
               'bc= 0x%04X, '
               'de= 0x%04X, '
               'hl= 0x%04X, '
               'sp= 0x%04X, '
               'pc= 0x%04X' % (self.get_af(), self.get_bc(), self.get_de(), self.get_hl(), self.get_sp(), self.get_pc()))
 
-        print('z: {}, n: {}, h: {}, c {}'.format('True' if self.get_zero_flag() else 'False',
+        print('\tz: {}, n: {}, h: {}, c {}'.format('True' if self.get_zero_flag() else 'False',
                                                  'True' if self.get_subtract_flag() else 'False',
                                                  'True' if self.get_half_carry_flag() else 'False',
                                                  'True' if self.get_carry_flag() else 'False'))

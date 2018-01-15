@@ -24,27 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
-import argparse
 
-from pygb.utility import GBTypes
-from pygb.gameboy import GameBoy
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--rom', dest='rom', action='store', default='',
-                    help='The rom to load')
-args = parser.parse_args()
-
-
-def main():
+class Capabilities:
     """
-    Create a gameboy object, load the rom, and run the CPU
+    The capabilities of the GameBoy sound hardware
     """
-    if len(args.rom) > 0 and os.path.isfile(args.rom):
-        gb = GameBoy(GBTypes.gameboy_classic)
-        gb.load_rom(args.rom)
-        gb.run_cpu()
-
-
-if __name__ == '__main__':
-    main()
+    num_channels = 4

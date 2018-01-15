@@ -28,6 +28,7 @@ SOFTWARE.
 from pygb.cpu import registers, interrupt
 from pygb.memory.memory import MemoryPool
 from pygb.cpu.instructions.instructions import instructions
+from pygb.utility import gb_type_select_var
 
 from pygb.settings import DEBUG
 from pygb.cpu.instructions.misc import nop
@@ -35,21 +36,26 @@ from pygb.cpu.instructions.misc import nop
 
 class Capabilities:
     cpu_clock_mhz = 4.194304
+    sgb_cpu_clock_mhz = 4.295454
 
 
 class CPU:
+    """
+    The GameBoy CPU
+    """
     def __init__(self, memory_space):
         self.registers = registers.RegisterBank()
         self.memory = memory_space  # type: MemoryPool
         self.interrupts = interrupt.Interrupts()
+        self.clock_mhz = Capabilities.cpu_clock_mhz
 
         # Setup the special instructions for enabling and disabling interrupt routines
         instructions[0xFB].execute = self.enable_interrupts
         instructions[0xF3].execute = self.disable_interrupts
 
-    def reset(self):
+    def reset(self, gb_type):
         # Setup the registers
-        self.registers.set_a(0x01)
+        self.registers.set_a(gb_type_select_var(gb_type, 0x01, 0x01, 0xFF, 0x11))
         self.registers.set_f(0xB0)
         self.registers.set_b(0x00)
         self.registers.set_c(0x13)
@@ -61,6 +67,12 @@ class CPU:
 
         # On power up, the GameBoy Program Counter is initialized to 0x100
         self.registers.set_pc(0x0100)
+
+        self.clock_mhz = gb_type_select_var(gb_type,
+                                            Capabilities.cpu_clock_mhz,
+                                            Capabilities.sgb_cpu_clock_mhz,
+                                            Capabilities.cpu_clock_mhz,
+                                            Capabilities.cpu_clock_mhz)
 
     def enable_interrupts(self, inst, reg, mem):
         self.interrupts.IME = 0x1
@@ -106,3 +118,4 @@ class CPU:
 
         if DEBUG:
             self.registers.print_registers()
+            self.interrupts.print_interrupts(self.memory)

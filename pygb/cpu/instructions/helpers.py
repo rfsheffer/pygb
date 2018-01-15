@@ -24,27 +24,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
-import argparse
+def is_pointer(inst_reg):
+    return inst_reg[1]
 
-from pygb.utility import GBTypes
-from pygb.gameboy import GameBoy
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--rom', dest='rom', action='store', default='',
-                    help='The rom to load')
-args = parser.parse_args()
-
-
-def main():
-    """
-    Create a gameboy object, load the rom, and run the CPU
-    """
-    if len(args.rom) > 0 and os.path.isfile(args.rom):
-        gb = GameBoy(GBTypes.gameboy_classic)
-        gb.load_rom(args.rom)
-        gb.run_cpu()
-
-
-if __name__ == '__main__':
-    main()
+def get_reg_val(ops, inst_reg, mem, reg):
+    read_func = mem.read_byte
+    if ops == 2:
+        read_func = mem.read_short
+    if is_pointer(inst_reg):
+        return read_func(reg.get_reg(inst_reg[0]))
+    else:
+        return reg.get_reg(inst_reg[0])

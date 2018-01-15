@@ -291,7 +291,7 @@ instructions = [
     Instruction("Unknown : DD",  0,  pygb.cpu.instructions.misc.nop),   # 0xDD
     Instruction("Unknown : DE",  0,  pygb.cpu.instructions.misc.nop),   # 0xDE
     Instruction("Unknown : DF",  0,  pygb.cpu.instructions.misc.nop),   # 0xDF
-    Instruction("Unknown : E0",  0,  pygb.cpu.instructions.misc.nop),   # 0xE0
+    Instruction("LDH (0xFF00+0x%02X), A",    12, pygb.cpu.instructions.load.ldh_n_a, (IReg.REGISTER_PC, True), (IReg.REGISTER_A, False), 1),   # 0xE0
     Instruction("Unknown : E1",  0,  pygb.cpu.instructions.misc.nop),   # 0xE1
     Instruction("Unknown : E2",  0,  pygb.cpu.instructions.misc.nop),   # 0xE2
     Instruction("Unknown : E3",  0,  pygb.cpu.instructions.misc.nop),   # 0xE3
@@ -307,7 +307,7 @@ instructions = [
     Instruction("Unknown : ED",  0,  pygb.cpu.instructions.misc.nop),   # 0xED
     Instruction("XOR 0x%02X",    8,  pygb.cpu.instructions.alu.xor_n, (IReg.REGISTER_PC, True), None, 1),   # 0xEE
     Instruction("Unknown : EF",  0,  pygb.cpu.instructions.misc.nop),   # 0xEF
-    Instruction("Unknown : F0",  0,  pygb.cpu.instructions.misc.nop),   # 0xF0
+    Instruction("LDH A, (0xFF00+0x%02X)", 12, pygb.cpu.instructions.load.ldh_a_n, (IReg.REGISTER_A, False), (IReg.REGISTER_PC, True), 1),   # 0xF0
     Instruction("Unknown : F1",  0,  pygb.cpu.instructions.misc.nop),   # 0xF1
     Instruction("Unknown : F2",  0,  pygb.cpu.instructions.misc.nop),   # 0xF2
     Instruction("DI",            4,  pygb.cpu.instructions.misc.nop),   # 0xF3
@@ -321,6 +321,6 @@ instructions = [
     Instruction("EI",            4,  pygb.cpu.instructions.misc.nop),   # 0xFB
     Instruction("Unknown : FC",  0,  pygb.cpu.instructions.misc.nop),   # 0xFC
     Instruction("Unknown : FD",  0,  pygb.cpu.instructions.misc.nop),   # 0xFD
-    Instruction("Unknown : FE",  0,  pygb.cpu.instructions.misc.nop),   # 0xFE
+    Instruction("CP 0x%02X",     8,  pygb.cpu.instructions.alu.cp_r1, (IReg.REGISTER_PC, True), None, 1),   # 0xFE
     Instruction("Unknown : FF",  0,  pygb.cpu.instructions.misc.nop),   # 0xFF
 ]

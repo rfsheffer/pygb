@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from pygb.cpu.registers import IReg
+from pygb.cpu.instructions.helpers import is_pointer
 
 '''
 ------------------------------------------------------------------
@@ -37,14 +38,14 @@ def ld_r1_r2(inst, reg, mem):
     if inst.operand_len == 2:
         read_func = mem.read_short
 
-    if inst.r1[1]:
+    if is_pointer(inst.r1):
         # r2 to (r1)
         val = reg.get_reg(inst.r2[0])
-        if inst.r2[1]:
+        if is_pointer(inst.r2):
             # (r2) to (r1)
             val = read_func(val)
         mem.write_byte(reg.get_reg(inst.r1[0]), val)
-    elif inst.r2[1]:
+    elif is_pointer(inst.r2):
         # (r2) to r1
         val = read_func(reg.get_reg(inst.r2[0]))
         reg.set_reg(inst.r1[0], val)
@@ -71,3 +72,13 @@ def ldd_hlp_a(inst, reg, mem):
 #         reg.set_hl(value)
 #     elif inst.r1[0] == IReg.REGISTER_SP:
 #         reg.set_sp(value)
+
+def ldh_n_a(inst, reg, mem):
+    """ Put A into memory address $FF00+n. """
+    val = mem.read_byte(reg.get_pc())
+    mem.write_byte(0xFF00 + val, reg.get_a())
+
+def ldh_a_n(inst, reg, mem):
+    """ Put memory address $FF00+n into A """
+    val = mem.read_byte(reg.get_pc())
+    reg.set_a(mem.read_byte(0xFF00 + val))

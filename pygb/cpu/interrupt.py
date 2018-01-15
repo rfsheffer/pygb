@@ -36,6 +36,12 @@ class Interrupts(object):
     INTERRUPT_ENABLE_ADDR = 0xFFFF
     INTERRUPT_FLAG_ADDR = 0xFF0F
 
+    VBLANK_START_ADDR = 0x0040
+    LCDSTAT_START_ADDR = 0x0048
+    TIMER_START_ADDR = 0x0050
+    SERIAL_START_ADDR = 0x0058
+    HIGH_LOW_START_ADDR = 0x0060
+
     def __init__(self):
         # Interrupt Master Enable
         # This controls whether the interrupt routines are enabled.
@@ -79,6 +85,17 @@ class Interrupts(object):
         if active_interrupts & self.INTERRUPT_JOYPAD:
             memory.write_byte(self.INTERRUPT_FLAG_ADDR, interrupt_flag & ~self.INTERRUPT_JOYPAD)
             self.joypad()
+
+    def print_interrupts(self, memory):
+        interrupt_enabled = memory.read_byte(self.INTERRUPT_ENABLE_ADDR)
+        interrupt_flag = memory.read_byte(self.INTERRUPT_FLAG_ADDR)
+        active_interrupts = interrupt_enabled & interrupt_flag
+        print('\tIME({}), VBLANK({}), LCD({}), TIM({}), SER({}), JOY({})'.format(self.IME,
+                                                                             active_interrupts & self.INTERRUPT_VBLANK,
+                                                                             active_interrupts & self.INTERRUPT_LCDSTAT,
+                                                                             active_interrupts & self.INTERRUPT_TIMER,
+                                                                             active_interrupts & self.INTERRUPT_SERIAL,
+                                                                             active_interrupts & self.INTERRUPT_JOYPAD))
 
     def vblank(self):
         """

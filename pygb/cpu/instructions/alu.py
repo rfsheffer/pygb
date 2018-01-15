@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from pygb.cpu.registers import IReg
+from pygb.cpu.instructions.helpers import is_pointer, get_reg_val
 
 
 def inc_r1(inst, reg, mem):
@@ -102,3 +103,21 @@ def xor_n(inst, reg, mem):
         xor_a(mem.read_byte(reg.get_reg(inst.r1[0])))
     else:
         xor_a(reg.get_reg(inst.r1[0]))
+
+
+def sub_r1(inst, reg, mem):
+    """ Subtract n from A. """
+    pass
+
+def cp_r1(inst, reg, mem):
+    """
+    Compare A with r1. This is basically an A - r1
+    subtraction instruction but the results are thrown
+    away.
+    """
+    a_reg = reg.get_a()
+    reg_val = get_reg_val(inst.operand_len, inst.r1, mem, reg)
+    reg.set_subtract_flag(True)
+    reg.set_zero_flag(a_reg - reg_val == 0)
+    reg.set_half_carry_flag((a_reg & 0x0F) < (reg_val & 0x0F))
+    reg.set_carry_flag(a_reg < reg_val)

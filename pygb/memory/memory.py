@@ -26,7 +26,7 @@ SOFTWARE.
 
 from copy import deepcopy
 import pygb.settings
-from pygb.utility import get_size_to_pretty
+from pygb.utility import get_size_to_pretty, gb_type_select_var
 
 
 class Capabilities:
@@ -184,8 +184,6 @@ class MemoryPool:
         # Memory Space View
         self.mv = None
 
-        self.reset()
-
         # This will be changed if the rom is using extra, bankable memory
         self.memory_mode = 0x00  # Rom Only by default
 
@@ -195,8 +193,6 @@ class MemoryPool:
         :param rom_bytes: The bytes of the rom
         :param mode_index: The memory bank mode type index
         """
-        self.reset()
-
         mode_string = rom_memory_bank_types[mode_index]
         print('Loading ROM size : {}, {}'.format(get_size_to_pretty(len(rom_bytes)), len(rom_bytes)))
         print('Rom uses bank access : {}'.format(mode_string))
@@ -219,7 +215,7 @@ class MemoryPool:
         # In the case of a 32kb rom, switch space will stay put, so defaulting bank 1 into this space seems ideal
         self.mv[0:MemoryLocations.video_ram_addr] = self.rv[0:MemoryLocations.video_ram_addr]
 
-    def reset(self):
+    def reset(self, gb_type):
         """
         Zero all memory in the pool
         """
@@ -227,6 +223,38 @@ class MemoryPool:
             self.mv.release()
         self.mem = bytearray(MemoryPool.MAX_POOL_SIZE)
         self.mv = memoryview(self.mem)
+
+        self.mem[0xFF05] = 0x00  # TIMA
+        self.mem[0xFF06] = 0x00  # TMA
+        self.mem[0xFF07] = 0x00  # TAC
+        self.mem[0xFF10] = 0x80  # NR10
+        self.mem[0xFF11] = 0xBF  # NR11
+        self.mem[0xFF12] = 0xF3  # NR12
+        self.mem[0xFF14] = 0xBF  # NR14
+        self.mem[0xFF16] = 0x3F  # NR21
+        self.mem[0xFF17] = 0x00  # NR22
+        self.mem[0xFF19] = 0xBF  # NR24
+        self.mem[0xFF1A] = 0x7F  # NR30
+        self.mem[0xFF1B] = 0xFF  # NR31
+        self.mem[0xFF1C] = 0x9F  # NR32
+        self.mem[0xFF1E] = 0xBF  # NR33
+        self.mem[0xFF20] = 0xFF  # NR41
+        self.mem[0xFF21] = 0x00  # NR42
+        self.mem[0xFF22] = 0x00  # NR43
+        self.mem[0xFF23] = 0xBF  # NR30
+        self.mem[0xFF24] = 0x77  # NR50
+        self.mem[0xFF25] = 0xF3  # NR51
+        self.mem[0xFF26] = gb_type_select_var(gb_type, 0xF1, 0xF0, 0xF1, 0xF1)  # NR52
+        self.mem[0xFF40] = 0x91  # LCDC
+        self.mem[0xFF42] = 0x00  # SCY
+        self.mem[0xFF43] = 0x00  # SCX
+        self.mem[0xFF45] = 0x00  # LYC
+        self.mem[0xFF47] = 0xFC  # BGP
+        self.mem[0xFF48] = 0xFF  # OBP0
+        self.mem[0xFF49] = 0xFF  # OBP1
+        self.mem[0xFF4A] = 0x00  # WY
+        self.mem[0xFF4B] = 0x00  # WX
+        self.mem[0xFFFF] = 0x00  # IE
 
     @staticmethod
     def check_address(address):
@@ -306,7 +334,7 @@ class MemoryPoolTest:
     @staticmethod
     def echo_space_test():
         memory_pool = MemoryPool()
-        memory_pool.reset()
+        memory_pool.reset(0)
 
         # This is the furthest address into internal ram echo can write to
         max_im_addr = MemoryLocations.internal_ram_addr + (MemoryLocations.sprite_attrib_mem_addr -
@@ -325,7 +353,7 @@ class MemoryPoolTest:
             raise MemoryPoolTest.MemoryPoolTestException('Write Byte: Echo mem space end did not get written to '
                                                          'correctly!')
 
-        memory_pool.reset()
+        memory_pool.reset(0)
 
         # Write to the start of the echo space, expect it on internal
         memory_pool.write_byte(MemoryLocations.echo_internal_addr, 0xDE)
@@ -339,7 +367,7 @@ class MemoryPoolTest:
             raise MemoryPoolTest.MemoryPoolTestException('Write Byte: Internal mem space end did not get written to '
                                                          'correctly!')
 
-        memory_pool.reset()
+        memory_pool.reset(0)
 
         # SHORT CHECK
         # Write to the start of the internal mem, except it to end up in the echo space
@@ -353,7 +381,7 @@ class MemoryPoolTest:
         if memory_pool.read_short(MemoryLocations.sprite_attrib_mem_addr - 2, 'big') != 0xDEAD:
             raise MemoryPoolTest.MemoryPoolTestException('Echo mem space end did not get written to correctly!')
 
-        memory_pool.reset()
+        memory_pool.reset(0)
 
         # Write to the start of the echo space, expect it on internal
         memory_pool.write_short(MemoryLocations.echo_internal_addr, 0xDEAD)
@@ -367,7 +395,7 @@ class MemoryPoolTest:
             raise MemoryPoolTest.MemoryPoolTestException('Write Short: Internal mem space end did not get written to '
                                                          'correctly!')
 
-        memory_pool.reset()
+        memory_pool.reset(0)
 
 # Test memory space module
 if pygb.settings.DEBUG:
